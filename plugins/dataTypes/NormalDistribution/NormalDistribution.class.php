@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Ben Keen <ben.keen@gmail.com>
  * @package DataTypes
@@ -20,9 +19,9 @@ class DataType_NormalDistribution extends DataTypePlugin {
 	public function generate($generator, $generationContextData) {
 		$mean   = (float) $generationContextData["generationOptions"]["mean"];
 		$stddev = (float) $generationContextData["generationOptions"]["stddev"];
-
+        $precision = (integer) $generationContextData["generationOptions"]["precision"];
 		return array(
-			"display" => $this->gauss_ms($mean, $stddev)
+			"display" => round($this->gauss_ms($mean, $stddev), $precision, PHP_ROUND_HALF_UP)
 		);
 	}
 
@@ -36,7 +35,8 @@ class DataType_NormalDistribution extends DataTypePlugin {
 
 		return array(
 			"mean"   => $postdata["dtOptionMean_$colNum"],
-			"stddev" => $postdata["dtOptionSigma_$colNum"]
+			"stddev" => $postdata["dtOptionSigma_$colNum"],
+			"precision" => $postdata["dtOptionPrecision_$colNum"]
 		);
 	}
 
@@ -44,17 +44,20 @@ class DataType_NormalDistribution extends DataTypePlugin {
 		$this->randMax = (float) getrandmax();
 
 		return array(
-			"mean"   => $json->settings->mean,
-			"stddev" => $json->settings->sigma
+			"mean"      => $json->settings->mean,
+			"stddev"    => $json->settings->sigma,
+			"precision" => $json->settings->precision
 		);
 	}
 
 	public function getOptionsColumnHTML() {
 		$options =<<< END
 			<label for="dtOptionMean_%ROW%">{$this->L["mean"]}</label>
-				<input type="text" name="dtOptionMean_%ROW%" id="dtOptionMean_%ROW%" style="width: 30px" value="0" />
+				<input type="text" name="dtOptionMean_%ROW%" id="dtOptionMean_%ROW%" style="width: 25px" value="0" />
 			<label for="dtOptionSigma_%ROW%">{$this->L["standard_deviation"]}</label>
-				<input type="text" name="dtOptionSigma_%ROW%" id="dtOptionSigma_%ROW%" style="width: 30px" value="1" />
+				<input type="text" name="dtOptionSigma_%ROW%" id="dtOptionSigma_%ROW%" style="width: 25px" value="1" />
+			<label for="dtOptionPrecision_%ROW%" title="Number of decimal places.">{$this->L["precision"]}</label>
+				<input type="text" name="dtOptionPrecision_%ROW%" id="dtOptionPrecision_%ROW%" style="width: 25px" value="10" />
 END;
 
 		return $options;
